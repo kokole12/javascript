@@ -7,6 +7,8 @@ const getRandomUsers = n => {
     fetchRandomUsers.then(data => {
         data.json().then(randomUsers => {
             console.log(JSON.stringify(randomUsers, null, 2))
+        }).catch(error => {
+            console.log(error)
         })
     })
 }
