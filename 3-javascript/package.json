@@ -1,5 +1,4 @@
 {
-  "type": "module",
   "dependencies": {
     "bluebird": "^3.7.2",
     "node-fetch": "^2.6.11"
