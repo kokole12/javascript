@@ -19,4 +19,4 @@ subscriber.on('message', (channel, message) => {
         subscriber.quit();
     }
     console.log(message);
-})
+});
