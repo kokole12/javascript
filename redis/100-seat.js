@@ -50,13 +50,13 @@ app.get('/reserve_seat', async (req, res) => {
 app.get('/process', (req, res) => {
     res.json({ "status": "Queue processing" });
     queue.process('reserve_seat', async (job, done) => {
-        const seat = Number(await getCurrentAvailableSeats());
-        if (seat === 0) {
+        const seats = Number(await getCurrentAvailableSeats());
+        if (seats === 0) {
             reservationEnabled = false;
             done(Error('Not enough seats available'));
         }
         else {
-            reserveSeat( seat - 1 );
+            reserveSeat( seats - 1 );
             done();
         }
 
