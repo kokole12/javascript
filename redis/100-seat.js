@@ -7,6 +7,8 @@ const app = express();
 const client = createClient();
 const queue = createQueue();
 
+let reservationEnabled = true;
+
 const getAsync = promisify(client.get).bind(client);
 const reserveSeat = (number) => {
     client.set('available_seats', number);
@@ -23,4 +25,44 @@ app.get('/available_seats', async (req, res) => {
     res.json({"numberOfAvailableSeats":numberofSeats});
 });
 
+app.get('/reserve_seat', async (req, res) => {
+    if (reservationEnabled ===  false) {
+        res.json({ "status": "Reservation in process" });
+        return;
+    }
+    const seatsJob = queue.createJob('reserve_seat', {'seat': 1}).save((error) => {
+        if (error) {
+            res.json({ "status": "Reservation failed" });
+            return;
+        }
+        res.json({ "status": "Reservation in process" });
+    });
+    seatsJob
+        .on('complete', () =>{
+            console.log(`Seat reservation job ${seatsJob.id} completed`);
+        })
+        .on('failed', (error) => {
+            console.log(`Seat reservation job JOB_ID failed: ${error}`);
+        });
+
+});
+
+app.get('/process', (req, res) => {
+    res.json({ "status": "Queue processing" });
+    queue.process('reserve_seat', async (job, done) => {
+        const seat = Number(await getCurrentAvailableSeats());
+        if (seat === 0) {
+            reservationEnabled = false;
+            done(Error('Not enough seats available'));
+        }
+        else {
+            reserveSeat( seat - 1 );
+            done();
+        }
+
+    });
+});
+
 app.listen(1245);
+reserveSeat(50);
+
