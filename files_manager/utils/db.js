@@ -2,13 +2,16 @@ import mongodb from 'mongodb';
 
 class DBClient {
   constructor() {
-    const host = process.env.DB_Host || 'localhost';
+    const host = process.env.DB_HOST || 'localhost';
     const port = process.env.DB_PORT || 27017;
-    const databse = process.env.DB_DATABASE || 'files_manager';
-
-    const uri = `mongodb://${host}:${port}/${databse}`;
-    this.client = new mongodb.MongoClient(uri, { useUnifiedTopology: true });
-    this.client.connect();
+    const database = process.env.DB_DATABASE || 'files_manager';
+    const uri = `mongodb://${host}:${port}`;
+    this.client = new mongodb.MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+    this.client.connect().then(() => {
+      this.db = this.client.db(`${database}`);
+    }).catch((error) => {
+      console.log(error);
+    });
   }
 
   isAlive() {
@@ -16,15 +19,13 @@ class DBClient {
   }
 
   async nbUsers() {
-    const db = this.client.db();
-    const collection = db.collection('users');
+    const collection = this.db.collection('users');
     const count = await collection.countDocuments();
     return count;
   }
 
   async nbFiles() {
-    const db = this.client.db();
-    const collection = db.collection('files');
+    const collection = this.db.collection('files');
     const count = await collection.countDocuments();
     return count;
   }
