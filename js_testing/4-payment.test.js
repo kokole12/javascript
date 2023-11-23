@@ -15,10 +15,13 @@ describe('sendPaymentRequestToApi', function() {
     })
 
     it('studing the function call to resutrn 10', function() {
-        const stud = sinon.stub(Utils, 'calculateNumber')
-        stud.returns(10)
+        const stub = sinon.stub(Utils, 'calculateNumber').withArgs('SUM', 100, 20)
+        const spy = sinon.spy(console, 'log');
+        stub.returns(10);
         const result = calculateNumber('SUM', 100, 20);
         expect(result).to.equal(10);
-        stud.restore();
+        expect(spy.calledOnce).to.be.true;
+        stub.restore();
+        spy.restore();
     })
 })
